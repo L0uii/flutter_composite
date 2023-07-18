@@ -10,7 +10,9 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: |
+    - name: Install Flutter
+      shell: bash
+      run: |
         export FLUTTER_VERSION="${{ inputs.FLUTTER_VERSION }}"
 
         FLUTTER_RUNNER_TOOL_CACHE=${RUNNER_TOOL_CACHE}/${FLUTTER_VERSION}
@@ -42,10 +44,22 @@ runs:
         	echo "Flutter SDK found in cache. The cached SDK is going to be used."
         fi
 
-        # Configure pub to use a fixed location.
+    - name: Configure pub to use a fixed location.
+      shell: bash
+      run: |
         echo "PUB_CACHE=${FLUTTER_RUNNER_TOOL_CACHE}/.pub-cache" >> $GITHUB_ENV
 
-        # Update paths.
+    - name: Update paths.
+      shell: bash
+      run: |
         echo "${FLUTTER_RUNNER_TOOL_CACHE}/.pub-cache/bin" >> $GITHUB_PATH
         echo "${FLUTTER_RUNNER_TOOL_CACHE}/flutter/bin" >> $GITHUB_PATH
+
+    - name: Set the tag
       shell: bash
+      run: |
+        if [ -z "${{inputs.tag}}" ] then
+            echo "final_tag=latest" >> $GITHUB_ENV
+          else
+            echo "final_tag=${{inputs.tag}}" >> $GITHUB_ENV
+        fi
